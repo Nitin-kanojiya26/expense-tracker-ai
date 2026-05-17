@@ -38,7 +38,7 @@ public class AIController {
         if (suggested != null) {
             return ResponseEntity.ok("Suggested Category: " + suggested.getName());
         }
-        return ResponseEntity.ok("Could not determine category");
+        return ResponseEntity.ok("AI unavailable - please try again in 1 minute");
     }
     // Feature 3 - Get Spending Insights (will be used later)
     // GET http://localhost:8080/api/ai/insights?userId=1
