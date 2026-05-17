@@ -1,6 +1,7 @@
 package com.example.Ai_Expense_Tracker.service;
 
 
+import com.example.Ai_Expense_Tracker.ai.CategorySuggestionService;
 import com.example.Ai_Expense_Tracker.dto.ExpenseDTO;
 import com.example.Ai_Expense_Tracker.dto.SummaryDTO;
 import com.example.Ai_Expense_Tracker.entity.Category;
@@ -11,6 +12,7 @@ import com.example.Ai_Expense_Tracker.repository.ExpenseRepository;
 import com.example.Ai_Expense_Tracker.repository.UserRepository;
 import com.example.Ai_Expense_Tracker.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -23,20 +25,31 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final CategorySuggestionService categorySuggestionService;
 
     public ExpenseDTO addExpense(Long userId, Expense expense, Long categoryId) {
         User user = resolveUserForOperation(userId);
         expense.setUser(user);
 
         if (categoryId != null) {
+            // User manually chose a category - use it directly
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new RuntimeException("Category not found!"));
-            requireCategoryAccess(category, user);
             expense.setCategory(category);
+        } else {
+            // No category chosen - ask AI to suggest one!
+            log.info("No category provided, asking AI...");
+            Category aiCategory = categorySuggestionService
+                    .suggestCategory(expense.getDescription());
+            if (aiCategory != null) {
+                expense.setCategory(aiCategory);
+                log.info("AI assigned category: {}", aiCategory.getName());
+            }
         }
 
         if (expense.getDate() == null) {

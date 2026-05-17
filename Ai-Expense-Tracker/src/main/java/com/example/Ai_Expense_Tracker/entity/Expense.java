@@ -3,8 +3,6 @@ package com.example.Ai_Expense_Tracker.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.stringtemplate.v4.ST;
-
 import java.time.LocalDate;
 
 @Entity
