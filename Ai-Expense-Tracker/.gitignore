@@ -29,5 +29,19 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+### Spring Boot ###
+application.properties
+application-local.properties
+
+### Environment / Secrets ###
+*.env
+.env
+
+### Maven ###
+*.jar
+*.war
+*.class
+
+### Logs ###
+*.log
+logs/
