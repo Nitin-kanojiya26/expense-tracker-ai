@@ -2,6 +2,7 @@ package com.example.Ai_Expense_Tracker.controller;
 
 import com.example.Ai_Expense_Tracker.ai.CategorySuggestionService;
 import com.example.Ai_Expense_Tracker.ai.GeminiClient;
+import com.example.Ai_Expense_Tracker.ai.SpendingInsightService;
 import com.example.Ai_Expense_Tracker.entity.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class AIController {
 
     private final GeminiClient geminiClient;
     private final CategorySuggestionService categorySuggestionService;
+    private final SpendingInsightService spendingInsightService;
     @GetMapping("/test")
     public ResponseEntity<String> testGemini(@RequestParam String prompt) {
         log.info("AI test endpoint called with prompt: {}", prompt);
@@ -45,8 +47,8 @@ public class AIController {
     @GetMapping("/insights")
     public ResponseEntity<String> getInsights(@RequestParam Long userId) {
         log.info("Getting spending insights for user: {}", userId);
-        // Full logic will be added in Feature 3
-        return ResponseEntity.ok("Insights feature coming soon!");
+        String insights = spendingInsightService.getSpendingInsights(userId);
+        return ResponseEntity.ok(insights);
     }
 
     // Feature 4 - Natural Language Query (will be used later)
