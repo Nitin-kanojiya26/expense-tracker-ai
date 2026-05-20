@@ -4,6 +4,7 @@ import com.example.Ai_Expense_Tracker.dto.UserDTO;
 import com.example.Ai_Expense_Tracker.entity.Role;
 import com.example.Ai_Expense_Tracker.entity.User;
 import com.example.Ai_Expense_Tracker.repository.UserRepository;
+import com.example.Ai_Expense_Tracker.security.JwtService;
 import com.example.Ai_Expense_Tracker.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public UserDTO registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
@@ -48,8 +50,8 @@ public class UserService {
 
     public Map<String, Object> loginUser(String username, String password) {
         Map<String, Object> response = new HashMap<>();
-
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        Optional<User> userOpt = userRepository.findByUsernameOrEmail(username, username);
+//        Optional<User> userOpt = userRepository.findByUsername(username);
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -59,8 +61,12 @@ public class UserService {
                 return response;
             }
             if (passwordEncoder.matches(password, user.getPassword())) {
+
+                String token = jwtService.generateToken(user.getUsername());
+
                 response.put("success", true);
                 response.put("message", "Login successful!");
+                response.put("token", token);
                 response.put("userId", user.getId());
                 response.put("username", user.getUsername());
                 response.put("fullName", user.getFullName());
