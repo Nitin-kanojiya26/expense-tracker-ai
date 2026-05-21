@@ -1,5 +1,6 @@
 package com.example.Ai_Expense_Tracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -24,4 +25,9 @@ public class Category {
     @ManyToOne
     @JoinColumn(name="user_id")
     private User user;
+
+    @JsonCreator
+    public Category(String name) {
+        this.name = name;
+    }
 }

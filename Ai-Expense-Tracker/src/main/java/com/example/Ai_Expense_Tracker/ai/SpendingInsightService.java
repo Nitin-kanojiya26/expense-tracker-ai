@@ -20,30 +20,23 @@ public class SpendingInsightService {
     private final ExpenseRepository expenseRepository;
 
     /**
-     * Fetches last 30 days expenses for user
-     * Sends summary to Gemini
-     * Returns AI generated spending insights and tips
+     * Aggregates trailing 30-day transactional metadata sets and runs optimization prompt arrays.
      */
     public String getSpendingInsights(Long userId) {
         try {
-            //  Get last 30 days expenses
             LocalDate end = LocalDate.now();
             LocalDate start = end.minusDays(30);
             List<Expense> expenses = expenseRepository
                     .findByUserIdAndDateBetween(userId, start, end);
 
-            //  Check if user has expenses
             if (expenses.isEmpty()) {
-                return "No expenses found in last 30 days. " +
-                        "Start adding expenses to get AI powered insights!";
+                return "ERROR: Shallow Ledger Matrix. No registered expense metrics captured across the past 30-day tracking scope. Register historical log lines to deploy models.";
             }
 
-            // Calculate total spending
             double total = expenses.stream()
                     .mapToDouble(Expense::getAmount)
                     .sum();
 
-            // Group expenses by category
             Map<String, Double> categoryWise = expenses.stream()
                     .filter(e -> e.getCategory() != null)
                     .collect(Collectors.groupingBy(
@@ -51,21 +44,19 @@ public class SpendingInsightService {
                             Collectors.summingDouble(Expense::getAmount)
                     ));
 
-            // Count uncategorized expenses
             long uncategorized = expenses.stream()
                     .filter(e -> e.getCategory() == null)
                     .count();
 
-            // Build expense summary for Gemini
             StringBuilder summary = new StringBuilder();
-            summary.append("My expense summary for last 30 days:\n");
-            summary.append("Total spent: Rs ").append(String.format("%.2f", total)).append("\n");
-            summary.append("Number of transactions: ").append(expenses.size()).append("\n");
-            summary.append("Average per day: Rs ")
+            summary.append("User transaction telemetry profile metadata for the previous trailing 30-day tracking window:\n");
+            summary.append("Aggregate Outflow: Rs ").append(String.format("%.2f", total)).append("\n");
+            summary.append("Transaction Row Density: ").append(expenses.size()).append(" rows\n");
+            summary.append("Calculated Mean Velocity per Day: Rs ")
                     .append(String.format("%.2f", total / 30)).append("\n");
 
             if (!categoryWise.isEmpty()) {
-                summary.append("\nCategory wise breakdown:\n");
+                summary.append("\nDynamic Category Allocations Matrix:\n");
                 categoryWise.forEach((category, amount) -> {
                     double percentage = (amount / total) * 100;
                     summary.append("- ").append(category)
@@ -75,32 +66,31 @@ public class SpendingInsightService {
             }
 
             if (uncategorized > 0) {
-                summary.append("- Uncategorized: ").append(uncategorized)
-                        .append(" transactions\n");
+                summary.append("- Unallocated Custom Items: ").append(uncategorized)
+                        .append(" transaction metrics unmapped\n");
             }
 
-            // Build prompt for Gemini
+            // RESTRUCTURED SYSTEM COMPLIANCE PROMPT CONTROLS
             String prompt = summary.toString() +
-                    "\nAs a friendly financial advisor, give me:\n" +
-                    "1. 3-4 specific insights about my spending patterns\n" +
-                    "2. Practical money saving tips with exact amounts in Rs\n" +
-                    "3. One encouraging message at the end\n" +
-                    "Be specific, friendly and use bullet points.\n" +
-                    "Keep total response under 200 words.";
+                    "\nYou are an elite automated financial advisory interface module. Review the ledger array summary telemetry listed above and construct exactly:\n" +
+                    "1. 3 separate highly detailed analytical insights regarding historical spending patterns.\n" +
+                    "2. 1 targeted optimization saving tip featuring precise currency reductions in Rs.\n" +
+                    "3. 1 short positive execution encouragement message row.\n\n" +
+                    "Architectural Formatting Rule: Provide your response strictly as simple single line items separated by standard newlines. Each line must be standalone. Do not insert conversational introductions, concluding headers, parenthetical numbering steps, or double asterisks (**). Keep total response count under 180 words.";
 
-            log.info("Asking Gemini for spending insights for user: {}", userId);
+            log.info("Requesting targeted optimization audit matrix via Gemini endpoint for profile ID: {}", userId);
             String insights = geminiClient.askGemini(prompt);
 
-            // Handle rate limit
-            if (insights.contains("Rate limit") || insights.contains("unavailable")) {
-                return "AI insights unavailable right now. Please try again in 1 minute.";
+            // STABILIZED GATEWAY LIMIT CHECK: Overwrite with unique error string prefix flags
+            if (insights.contains("Rate limit") || insights.contains("RESOURCE_EXHAUSTED") || insights.contains("unavailable")) {
+                return "ERROR: Server Gateway Latency. Machine learning compute engines are heavily loaded. Please re-trigger forecast routines in 60 seconds.";
             }
 
             return insights;
 
         } catch (Exception e) {
-            log.error("Failed to get spending insights: {}", e.getMessage());
-            return "Could not generate insights. Please try again later.";
+            log.error("Critical analytical interruption within insight module pipelines: {}", e.getMessage());
+            return "ERROR: System compilation failure. Data logs aborted unexpectedly.";
         }
     }
 }

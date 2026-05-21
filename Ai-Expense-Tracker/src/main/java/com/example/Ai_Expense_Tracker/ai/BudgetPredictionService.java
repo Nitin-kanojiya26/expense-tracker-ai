@@ -22,33 +22,27 @@ public class BudgetPredictionService {
     private final ExpenseRepository expenseRepository;
 
     /**
-     * Fetches last 3 months expenses
-     * Sends monthly breakdown to Gemini
-     * Returns AI predicted budget for next month
+     * Compiles historical 3-month transaction matrices and feeds structured records
+     * into Gemini with statistical weighting instructions for formula execution.
      */
     public String predictNextMonthBudget(Long userId) {
         try {
-            //  Get last 3 months expenses
             LocalDate end = LocalDate.now();
             LocalDate start = end.minusMonths(3);
             List<Expense> expenses = expenseRepository
                     .findByUserIdAndDateBetween(userId, start, end);
 
-            // Check if enough data exists
             if (expenses.size() < 5) {
-                return "Not enough expense data to make a prediction. " +
-                        "Please add at least 5 expenses over the last 3 months and try again!";
+                return "ERROR: Shallow Ledger Base. Please register at least 5 baseline expenses across your historical 3-month cycle to build automated projections.";
             }
 
-            //  Group expenses by month
             Map<YearMonth, List<Expense>> byMonth = expenses.stream()
                     .collect(Collectors.groupingBy(
                             e -> YearMonth.from(e.getDate())
                     ));
 
-            //  Build monthly summary for Gemini
             StringBuilder historySummary = new StringBuilder();
-            historySummary.append("User's spending history for last 3 months:\n\n");
+            historySummary.append("Historical spending telemetry metrics for user account rows:\n\n");
 
             byMonth.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey())
@@ -60,14 +54,13 @@ public class BudgetPredictionService {
                                 .mapToDouble(Expense::getAmount)
                                 .sum();
 
-                        historySummary.append("Month: ")
+                        historySummary.append("Target Timeline Cycle: ")
                                 .append(month.format(DateTimeFormatter.ofPattern("MMMM yyyy")))
                                 .append("\n");
-                        historySummary.append("Total: Rs ")
+                        historySummary.append("Aggregate Operational Value: Rs ")
                                 .append(String.format("%.2f", monthTotal))
                                 .append("\n");
 
-                        // Category wise breakdown for this month
                         Map<String, Double> catWise = monthExpenses.stream()
                                 .filter(e -> e.getCategory() != null)
                                 .collect(Collectors.groupingBy(
@@ -76,9 +69,9 @@ public class BudgetPredictionService {
                                 ));
 
                         catWise.forEach((cat, amt) ->
-                                historySummary.append("  - ")
+                                historySummary.append("  - Class Type [")
                                         .append(cat)
-                                        .append(": Rs ")
+                                        .append("]: Rs ")
                                         .append(String.format("%.2f", amt))
                                         .append("\n"));
 
@@ -86,44 +79,50 @@ public class BudgetPredictionService {
                                 .filter(e -> e.getCategory() == null)
                                 .count();
                         if (uncategorized > 0) {
-                            historySummary.append("  - Uncategorized: ")
+                            historySummary.append("  - Dynamic Raw Log Entries: ")
                                     .append(uncategorized)
-                                    .append(" transactions\n");
+                                    .append(" units unmapped\n");
                         }
 
                         historySummary.append("\n");
                     });
 
-            //  Next month name
             String nextMonth = YearMonth.now()
                     .plusMonths(1)
                     .format(DateTimeFormatter.ofPattern("MMMM yyyy"));
 
-            //  Ask Gemini to predict
+            // STATISTICALLY ENFORCED ARCHITECTURE PROMPT
             String prompt = historySummary.toString() +
-                    "Based on this 3 month spending history, predict the budget for " + nextMonth + ".\n\n" +
-                    "Format your response exactly like this:\n" +
-                    "Budget Prediction for " + nextMonth + ":\n" +
-                    "• [Category]: Rs [amount]\n" +
-                    "• [Category]: Rs [amount]\n" +
-                    "Total Predicted: Rs [total]\n\n" +
-                    "Trend Analysis: [1-2 lines about spending trend]\n" +
-                    "Top Tip: [one specific money saving tip with amount]\n\n" +
-                    "Keep it concise and practical.";
+                    "You are a financial backend statistical processor. You do not creatively estimate numbers.\n" +
+                    "Task: Forecast the allocations for " + nextMonth + " using a strict 3-Month Weighted Moving Average mathematical formula.\n" +
+                    "Apply these weights precisely across the monthly data provided above: 50% weight for the most recent month, 30% for the middle month, and 20% for the oldest month.\n\n" +
 
-            log.info("Predicting budget for user: {}", userId);
+                    "Step 1: For each category, multiply its monthly totals by the assigned percentage weights and sum them to determine the exact forecast allocation.\n" +
+                    "Step 2: Add all individual category calculations together to find the precise Total Predicted budget balance.\n\n" +
+
+                    "You must format your final output sequence exactly like this template layout. Do not alter headings or mix conversational rows into the list block:\n" +
+                    "Budget Prediction for " + nextMonth + ":\n" +
+                    "• [Category Name]: Rs [Calculated Amount]\n" +
+                    "• [Category Name]: Rs [Calculated Amount]\n" +
+                    "Total Predicted: Rs [Sum of All Calculated Amounts]\n\n" +
+                    "---\n\n" +
+                    "AI Budget Insights:\n" +
+                    "Trend Analysis: [Identify the single category with the highest mathematical upward slope and state its growth trend]\n" +
+                    "Top Tip: [Provide 1 actionable optimization advisory sentence referencing a target reduction limit amount]\n\n" +
+                    "Constraint: Keep raw lines separate. Do not wrap code snippets around the text output. Round all values to 2 decimal places.";
+
+            log.info("Executing formulaic predictive routines for user account ID: {}", userId);
             String prediction = geminiClient.askGemini(prompt);
 
-            // Handle rate limit
-            if (prediction.contains("Rate limit") || prediction.contains("unavailable")) {
-                return "AI is busy right now. Please wait 1 minute and try again.";
+            if (prediction.contains("Rate limit") || prediction.contains("RESOURCE_EXHAUSTED") || prediction.contains("unavailable")) {
+                return "ERROR: Server Gateway Latency. Machine learning compute engines are heavily loaded. Please re-trigger forecast routines in 60 seconds.";
             }
 
             return prediction;
 
         } catch (Exception e) {
-            log.error("Budget prediction failed: {}", e.getMessage());
-            return "Could not generate budget prediction. Please try again later.";
+            log.error("Core critical exception inside forecasting module: {}", e.getMessage());
+            return "ERROR: Data compilation aborted unexpectedly. Check system structural logs.";
         }
     }
 }
