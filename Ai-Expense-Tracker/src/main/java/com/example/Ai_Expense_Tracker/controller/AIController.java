@@ -1,6 +1,7 @@
 package com.example.Ai_Expense_Tracker.controller;
 
 import com.example.Ai_Expense_Tracker.ai.*;
+import com.example.Ai_Expense_Tracker.dto.InsightResponseDTO;
 import com.example.Ai_Expense_Tracker.entity.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +46,9 @@ public class AIController {
     //  Get Spending Insights (will be used later)
     // GET http://localhost:8080/api/ai/insights?userId=1
     @GetMapping("/insights")
-    public ResponseEntity<String> getInsights(@RequestParam Long userId) {
+    public ResponseEntity<InsightResponseDTO> getInsights(@RequestParam Long userId) {
         log.info("Getting spending insights for user: {}", userId);
-        String insights = spendingInsightService.getSpendingInsights(userId);
+        InsightResponseDTO insights = spendingInsightService.getSpendingInsights(userId);
         return ResponseEntity.ok(insights);
     }
 
