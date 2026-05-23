@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Force Tailwind v4 to look for the manual utility string */
+@variant dark (&:where(.dark, .dark *));
+
+/* ☀️ BASE LIGHT MODE VARIABLES */
+@theme {
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
+  --color-card: #ffffff;
+  --color-card-foreground: #09090b;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #09090b;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f4f4f5;
+  --color-secondary-foreground: #09090b;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-accent: #f4f4f5;
+  --color-accent-foreground: #09090b;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #000000;
+  --color-border: #e4e4e7;
+  --color-input: #e4e4e7;
+  --color-ring: #3b82f6;
+  
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* 🌙 FORCE RE-MAPPING WHEN HTML HAS THE .dark CLASS */
+:root.dark {
+  --color-background: #0a0a0f !important;
+  --color-foreground: #f4f4f5 !important;
+  --color-card: #141419 !important;
+  --color-card-foreground: #f4f4f5 !important;
+  --color-popover: #141419 !important;
+  --color-popover-foreground: #f4f4f5 !important;
+  --color-secondary: #1e1e26 !important;
+  --color-secondary-foreground: #f4f4f5 !important;
+  --color-muted: #1e1e26 !important;
+  --color-muted-foreground: #a1a1aa !important;
+  --color-accent: #1e1e26 !important;
+  --color-accent-foreground: #f4f4f5 !important;
+  --color-border: #27272a !important;
+  --color-input: #27272a !important;
+}
+
+html, body {
+  background-color: var(--color-background) !important;
+  color: var(--color-foreground) !important;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-foreground);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
