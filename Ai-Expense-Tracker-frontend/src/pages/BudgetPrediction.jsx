@@ -199,8 +199,8 @@ export default function BudgetPrediction() {
               <Layers className="h-10 w-10 text-primary animate-pulse" />
             </div>
             <div className="space-y-1.5">
-              <h3 className="text-lg font-bold text-foreground tracking-tight">Compiling Transaction Metrics</h3>
-              <p className="text-xs text-muted-foreground max-w-xs mx-auto">Evaluating trailing account parameters and multi-category variances via backend API layers.</p>
+              <h3 className="text-lg font-bold text-foreground tracking-tight">Compiling Transactions</h3>
+              <p className="text-xs text-muted-foreground max-w-xs mx-auto">Evaluating your Expenses for next month</p>
             </div>
           </CardContent>
         </Card>
@@ -215,11 +215,11 @@ export default function BudgetPrediction() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.02] rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
             <CardContent className="p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
               <div className="space-y-1.5">
-                <span className="text-xs font-extrabold tracking-widest text-muted-foreground uppercase tracking-wide opacity-90">Aggregated Ceiling Target</span>
+                <span className="text-xs font-extrabold tracking-widest text-muted-foreground uppercase tracking-wide opacity-90">Target</span>
                 <h2 className="text-4xl sm:text-5xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight tabular-nums drop-shadow-xs">
                   {formatCurrency(total)}
                 </h2>
-                <p className="text-xs text-muted-foreground">Optimal targeted operational ceiling model generated across all categories combined.</p>
+        
               </div>
               <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/15 rounded-xl px-4 py-3 text-emerald-600 dark:text-emerald-400 self-start sm:self-auto shadow-2xs">
                 <TrendingUp className="h-5 w-5 shrink-0" />
@@ -238,8 +238,8 @@ export default function BudgetPrediction() {
                       <PieChart className="h-4 w-4" />
                     </div>
                     <div>
-                      <CardTitle className="text-base font-bold text-foreground">Outlay Visual Analytics</CardTitle>
-                      <CardDescription className="text-xs">Dynamic target volume distribution across calculated classes.</CardDescription>
+                      <CardTitle className="text-base font-bold text-foreground">Visual Analytics</CardTitle>
+                
                     </div>
                   </div>
                 </CardHeader>
@@ -299,9 +299,9 @@ export default function BudgetPrediction() {
                 <CardContent className="p-10 text-center flex flex-col items-center justify-center space-y-3">
                   <ShieldAlert className="h-10 w-10 text-amber-500" />
                   <div>
-                    <p className="font-bold text-amber-500">Parsing Constraint Encountered</p>
+                    <p className="font-bold text-amber-500">AI Suggestion Didn't Match</p>
                     <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-                      The predictive pipeline executed successfully but data points formatted irregularly. Please trace console debug parameters.
+                      We found a category, but it looks a bit unusual.
                     </p>
                   </div>
                 </CardContent>
@@ -319,8 +319,8 @@ export default function BudgetPrediction() {
                       <DollarSign className="h-4 w-4" />
                     </div>
                     <div>
-                      <CardTitle className="text-base font-bold text-foreground">Forecast Ledger Matrix</CardTitle>
-                      <CardDescription className="text-xs">Granular matrix distribution fields.</CardDescription>
+                      <CardTitle className="text-base font-bold text-foreground">Predicted Expenses</CardTitle>
+                      <CardDescription className="text-xs">Detailed Expense Breakdown</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
