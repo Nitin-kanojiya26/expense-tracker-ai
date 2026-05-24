@@ -187,7 +187,7 @@ export default function AIInsights() {
           <Card className="lg:col-span-1 border border-border/80 bg-card shadow-xs rounded-2xl space-y-4 p-5 lg:sticky lg:top-6">
             <div>
               <h3 className="text-sm font-bold tracking-tight text-foreground">Last 30 Days Summary</h3>
-              <p className="text-[11px] text-muted-foreground">A clean summary of your active spending history.</p>
+      
             </div>
 
             <div className="space-y-3">

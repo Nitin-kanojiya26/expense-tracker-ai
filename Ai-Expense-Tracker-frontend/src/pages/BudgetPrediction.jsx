@@ -153,10 +153,10 @@ export default function BudgetPrediction() {
             </Badge>
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground bg-clip-text text-transparent">
-            Predictive Analytics Workspace
+            SmartBudget Studio
           </h1>
           <p className="text-sm text-muted-foreground max-w-xl">
-            Formulaic weighted averages tracking transactional resource requirements across active financial matrix accounts.
+          Get Budget for your next month
           </p>
         </div>
         
@@ -169,7 +169,7 @@ export default function BudgetPrediction() {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Running Neural Models...
+              Running..
             </>
           ) : cooldown > 0 ? (
             <>
@@ -179,7 +179,7 @@ export default function BudgetPrediction() {
           ) : prediction ? (
             <>
               <RefreshCw className="mr-2 h-4 w-4 transition-transform group-hover:rotate-180 duration-700" />
-              Recalculate Forecast
+              Recalculate
             </>
           ) : (
             <>
@@ -360,7 +360,7 @@ export default function BudgetPrediction() {
             <div className="space-y-1.5">
               <h3 className="font-bold text-foreground tracking-tight text-lg">Awaiting Analytics Trigger</h3>
               <p className="text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
-                No active target analytics payload is present. Tap the calculation control system above to compute next month's transactional matrix.
+                No forecast data found. Click the Generate Prediction Button above to analyze and predict next month's transactions
               </p>
             </div>
           </CardContent>

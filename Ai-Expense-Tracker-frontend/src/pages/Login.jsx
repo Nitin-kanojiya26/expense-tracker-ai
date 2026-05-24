@@ -7,14 +7,12 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Checkbox } from '../components/ui/checkbox';
 import { Eye, EyeOff, Loader2, Wallet } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const { login } = useAuth();
@@ -40,10 +38,10 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      // Passes the clean credentials matching your backend path
       const response = await loginApi(username, password);
       
-      if (response && response.success) {
+      // Explicit check for true because backends can pass back 200 OK with success: false
+      if (response && response.success === true) {
         login(response);
         toast.success('Login successful!');
         navigate('/dashboard');
@@ -55,6 +53,12 @@ export default function Login() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Triggers the placeholder notification for missing features
+  const handleForgotPasswordClick = (e) => {
+    e.preventDefault();
+    toast.info('Feature coming soon!');
   };
 
   return (
@@ -118,24 +122,14 @@ export default function Login() {
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={setRememberMe}
-                  disabled={isLoading}
-                />
-                <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                  Remember me
-                </Label>
-              </div>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-primary hover:underline"
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={handleForgotPasswordClick}
+                className="text-sm text-primary hover:underline bg-transparent border-none p-0 cursor-pointer"
               >
                 Forgot password?
-              </Link>
+              </button>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

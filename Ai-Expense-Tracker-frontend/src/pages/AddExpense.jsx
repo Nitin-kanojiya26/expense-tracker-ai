@@ -394,11 +394,11 @@ export default function AddExpense() {
 
             <div className="space-y-2">
               <Label htmlFor="notes" className="text-xs font-bold tracking-tight">Notes (Optional)</Label>
-              <Textarea id="notes" name="notes" placeholder="Log deep purchase context here..." value={formData.notes} onChange={handleChange} rows={3} className="rounded-xl border-border/60 resize-none text-xs" />
+              <Textarea id="notes" name="notes" placeholder="purchase context here..." value={formData.notes} onChange={handleChange} rows={3} className="rounded-xl border-border/60 resize-none text-xs" />
             </div>
 
             <Button type="submit" className="w-full rounded-xl font-bold h-11 transition-all active:scale-[0.99] cursor-pointer shadow-sm pt-0.5" disabled={isLoading || isPageLoading}>
-              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving entry...</> : <><Plus className="mr-2 h-4 w-4" /> Save Ledger Item</>}
+              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving entry...</> : <><Plus className="mr-2 h-4 w-4" /> Save Expense</>}
             </Button>
           </form>
         </CardContent>

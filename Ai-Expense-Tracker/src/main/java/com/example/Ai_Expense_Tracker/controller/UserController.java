@@ -1,6 +1,7 @@
 package com.example.Ai_Expense_Tracker.controller;
 
 import com.example.Ai_Expense_Tracker.dto.LoginRequest;
+import com.example.Ai_Expense_Tracker.dto.PasswordChangeRequest;
 import com.example.Ai_Expense_Tracker.dto.RegisterRequest;
 import com.example.Ai_Expense_Tracker.dto.UserDTO;
 import com.example.Ai_Expense_Tracker.entity.User;
@@ -44,6 +45,17 @@ public class UserController {
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<?> changePassword(
+            @PathVariable Long id,
+            @RequestBody PasswordChangeRequest request) {
+        try {
+            userService.changePassword(id, request);
+            return ResponseEntity.ok().body(Map.of("message", "Password changed successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

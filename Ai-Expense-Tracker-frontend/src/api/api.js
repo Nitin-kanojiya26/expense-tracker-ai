@@ -23,18 +23,25 @@ const handleResponse = async (response) => {
   if (response.status === 401) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/login';
-    throw new Error('Unauthorized');
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    throw new Error('Incorrect username/email or password.');
   }
 
   if (!response.ok) {
     const rawError = await response.text();
     let friendlyMessage = 'Something went wrong';
     try {
-      const parsedError = JSON.parse(rawError);
-      if (parsedError.message) friendlyMessage = parsedError.message;
+      if (rawError.trim().startsWith('{') || rawError.trim().startsWith('[')) {
+        const parsedError = JSON.parse(rawError);
+        if (parsedError.message) friendlyMessage = parsedError.message;
+      } else if (rawError) {
+        friendlyMessage = rawError;
+      }
     } catch (e) {
-      if (rawError) friendlyMessage = rawError;
+      console.error("Error evaluating response text stream", e);
     }
     throw new Error(friendlyMessage);
   }
@@ -172,13 +179,15 @@ export const updateUser = async (userId, userData) => {
 
 export const changePassword = async (userId, currentPassword, newPassword) => {
   const res = await fetch(`${API_BASE_URL}/users/${userId}/change-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    method: 'PUT', 
+    headers: { 
+      'Content-Type': 'application/json', 
+      ...getAuthHeader() 
+    },
     body: JSON.stringify({ currentPassword, newPassword }),
   });
   return handleResponse(res);
 };
-
 export const deleteAccount = async (userId) => {
   const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
     method: 'DELETE',

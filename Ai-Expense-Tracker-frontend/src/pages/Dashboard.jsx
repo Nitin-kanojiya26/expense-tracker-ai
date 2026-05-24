@@ -112,7 +112,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-          <p className="text-muted-foreground text-xs mt-0.5">Real-time metrics calculated directly from database records</p>
+          <p className="text-muted-foreground text-xs mt-0.5">Real-time calculated Records</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Link to="/add-expense" className="flex-1 sm:flex-initial">
@@ -157,12 +157,12 @@ export default function Dashboard() {
       {/* Graphical Chart Visualization Segment Grid Block Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="md:col-span-1 lg:col-span-4 rounded-2xl border-border/60 shadow-sm">
-          <CardHeader><CardTitle className="text-sm font-extrabold tracking-tight">Category Distribution Breakdowns</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-sm font-extrabold tracking-tight">Category Distribution</CardTitle></CardHeader>
           <CardContent className="h-[300px]">
             {isLoading ? (
               <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-muted-foreground" /></div>
             ) : chartVisualizationData.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-xs text-muted-foreground">Empty transaction ledger context indices.</div>
+              <div className="flex items-center justify-center h-full text-xs text-muted-foreground">No transactions</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

@@ -1,5 +1,6 @@
 package com.example.Ai_Expense_Tracker.service;
 
+import com.example.Ai_Expense_Tracker.dto.PasswordChangeRequest;
 import com.example.Ai_Expense_Tracker.dto.UserDTO;
 import com.example.Ai_Expense_Tracker.entity.Role;
 import com.example.Ai_Expense_Tracker.entity.User;
@@ -125,5 +126,22 @@ public class UserService {
         if (!current.getId().equals(userId)) {
             throw new AccessDeniedException("Access denied");
         }
+    }
+    public void changePassword(Long id, PasswordChangeRequest request) {
+        // 1. Security Check: Ensure the logged-in user owns this account
+        requireOwnerOrAdmin(id);
+
+        // 2. Locate user in database
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        // 3. Verify current password matches database encrypted hash
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Incorrect current password!");
+        }
+
+        // 4. Securely hash the new password and save cleanly
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

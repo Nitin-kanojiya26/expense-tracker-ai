@@ -23,7 +23,6 @@ export default function Register() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // Password Strength Formula with string validation checks
   const getPasswordStrength = (pwd) => {
     const passwordStr = String(pwd || ''); 
     if (!passwordStr) return 0;
@@ -58,7 +57,6 @@ export default function Register() {
     { label: 'Contains number or symbol', valid: /[0-9]/.test(String(formData.password || '')) || /[^A-Za-z0-9]/.test(String(formData.password || '')) },
   ];
 
-  // FIX: Direct input updater function that does not depend on target name properties
   const updateField = (fieldName, value) => {
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
     if (errors[fieldName]) {
@@ -149,7 +147,7 @@ export default function Register() {
               <Label htmlFor="fullName">Full Name</Label>
               <Input
                 id="fullName"
-                placeholder="John Doe"
+                placeholder="Nitin Kanojiya"
                 value={formData.fullName}
                 onChange={(e) => updateField('fullName', e.target.value)}
                 className={errors.fullName ? 'border-destructive' : ''}
