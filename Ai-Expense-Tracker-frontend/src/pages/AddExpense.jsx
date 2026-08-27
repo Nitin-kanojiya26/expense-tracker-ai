@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createExpense, suggestCategory, getCategories, generateUniqueColor } from '../api/api'; 
+import { createExpense, suggestCategory, getCategories, generateUniqueColor } from '../api/api';
 import { toast, Toaster } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -44,7 +44,7 @@ export default function AddExpense() {
     try {
       const data = await getCategories(userId);
       if (Array.isArray(data) && data.length > 0) {
-        
+
         const uniqueCategoriesMap = new Map();
         data.forEach(cat => {
           if (cat && cat.name) {
@@ -53,7 +53,7 @@ export default function AddExpense() {
               uniqueCategoriesMap.set(lowercaseKey, {
                 ...cat,
                 id: String(cat.id),
-                name: cat.name.trim() 
+                name: cat.name.trim()
               });
             }
           }
@@ -75,15 +75,15 @@ export default function AddExpense() {
     const initializeUserCategories = async () => {
       if (!user?.id) return;
       setIsPageLoading(true);
-      
+
       const hasCategories = await fetchAndSyncCategories(user.id);
-      
+
       if (!hasCategories) {
         try {
           const token = localStorage.getItem('token');
           const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-          
-          const seedRequests = SYSTEM_CORE_DEFAULTS.map(name => 
+
+          const seedRequests = SYSTEM_CORE_DEFAULTS.map(name =>
             fetch(`http://localhost:8080/api/categories/user/${user.id}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', ...authHeader },
@@ -127,11 +127,11 @@ export default function AddExpense() {
     const debounceTimer = setTimeout(async () => {
       setIsSuggesting(true);
       setAiErrorState(false);
-      
+
       try {
         const result = await suggestCategory(textTarget, controller.signal);
         let parsedName = result?.category || result;
-        
+
         if (parsedName && typeof parsedName === 'string') {
           parsedName = parsedName
             .replace(/suggested category:\s*/i, '')
@@ -141,9 +141,9 @@ export default function AddExpense() {
           const lowerResult = parsedName.toLowerCase();
 
           if (
-            lowerResult.includes('error') || 
-            lowerResult.includes('unavailable') || 
-            lowerResult.includes('failed') || 
+            lowerResult.includes('error') ||
+            lowerResult.includes('unavailable') ||
+            lowerResult.includes('failed') ||
             parsedName.length > 25
           ) {
             setSuggestedCategory(null);
@@ -176,7 +176,7 @@ export default function AddExpense() {
     // Small-letter guard verification to cross-check existence dynamically
     const cleanSuggested = suggestedCategory.trim().toLowerCase();
     const matched = dbCategories.find(c => c.name.toLowerCase().trim() === cleanSuggested);
-    
+
     if (matched) {
       setFormData(prev => ({ ...prev, categoryId: String(matched.id) }));
       toast.success(`Matched to existing category: "${matched.name}"`);
@@ -186,10 +186,10 @@ export default function AddExpense() {
     setIsLoading(true);
     try {
       toast.loading(`Creating new category "${suggestedCategory}"...`, { id: "on-the-fly-cat" });
-      
+
       const token = localStorage.getItem('token');
       const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-      
+
       const response = await fetch(`http://localhost:8080/api/categories/user/${user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeader },
@@ -208,13 +208,13 @@ export default function AddExpense() {
       setDbCategories(prev => {
         const absoluteCleanName = stringifiedEntity.name.toLowerCase();
         if (prev.some(c => c.name.toLowerCase().trim() === absoluteCleanName)) {
-          return prev; 
+          return prev;
         }
         return [...prev, stringifiedEntity];
       });
 
       setFormData(prev => ({ ...prev, categoryId: stringifiedEntity.id }));
-      
+
       toast.dismiss("on-the-fly-cat");
       toast.success(`Saved and applied new category: "${suggestedCategory}"`);
     } catch (err) {
@@ -307,16 +307,16 @@ export default function AddExpense() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            
+
             <div className="space-y-2">
               <Label htmlFor="description" className="text-xs font-bold tracking-tight">Description</Label>
-              <Input 
-                id="description" 
-                name="description" 
-                placeholder="e.g., Groceries or Uber Ride" 
-                value={formData.description} 
-                onChange={handleChange} 
-                className={`rounded-xl h-10 ${errors.description ? 'border-destructive' : 'border-border/60'}`} 
+              <Input
+                id="description"
+                name="description"
+                placeholder="e.g., Groceries or Uber Ride"
+                value={formData.description}
+                onChange={handleChange}
+                className={`rounded-xl h-10 ${errors.description ? 'border-destructive' : 'border-border/60'}`}
               />
               {errors.description && <p className="text-xs font-medium text-destructive">{errors.description}</p>}
             </div>
@@ -366,8 +366,8 @@ export default function AddExpense() {
                   <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading categories ledger...
                 </div>
               ) : (
-                <Select 
-                  value={formData.categoryId} 
+                <Select
+                  value={formData.categoryId}
                   onValueChange={handleCategorySelect}
                   key={formData.categoryId}
                 >
@@ -378,9 +378,9 @@ export default function AddExpense() {
                     {dbCategories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id} className="rounded-lg">
                         <div className="flex items-center gap-2">
-                          <div 
-                            className="w-2.5 h-2.5 rounded-full" 
-                            style={{ backgroundColor: generateUniqueColor(cat.name) }} 
+                          <div
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: generateUniqueColor(cat.name) }}
                           />
                           <span className="text-xs font-medium text-foreground/90">{cat.name}</span>
                         </div>

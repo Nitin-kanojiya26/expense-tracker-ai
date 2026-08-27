@@ -1,5 +1,4 @@
 const API_BASE_URL = 'http://localhost:8080/api';
-
 // 1. DYNAMIC CHROMATIC DESIGN PALETTE
 const COLOR_PALETTE = ['#f97316', '#3b82f6', '#06b6d4', '#6366f1', '#ec4899', '#8b5cf6', '#ef4444', '#eab308', '#22c55e', '#14b8a6', '#10b981'];
 
@@ -179,10 +178,10 @@ export const updateUser = async (userId, userData) => {
 
 export const changePassword = async (userId, currentPassword, newPassword) => {
   const res = await fetch(`${API_BASE_URL}/users/${userId}/change-password`, {
-    method: 'PUT', 
-    headers: { 
-      'Content-Type': 'application/json', 
-      ...getAuthHeader() 
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader()
     },
     body: JSON.stringify({ currentPassword, newPassword }),
   });
@@ -199,11 +198,11 @@ export const generateUniqueColor = (str) => {
   if (!str) return 'hsl(0, 0%, 50%)';
   let hash = 0;
   const cleanStr = str.trim().toLowerCase();
-  
+
   for (let i = 0; i < cleanStr.length; i++) {
     hash = cleanStr.charCodeAt(i) + ((hash << 5) - hash);
   }
-  
+
   // Deterministic Hue generation (0-360) with vibrant saturation
   const hue = Math.abs(hash % 360);
   return `hsl(${hue}, 65%, 50%)`;
