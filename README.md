@@ -1,187 +1,210 @@
-# AI-Powered Financial Ledger & Predictive Analytics Engine
+# Expense Tracker AI
 
-An enterprise-grade, full-stack personal finance application engineered to automate transactional ledger tracking through real-time asynchronous AI inference pipelines. This architecture cleanly decouples high-latency machine learning tasks from core transactional CRUD processes, utilizing intelligent data pipelines, reactive UI state hydration, and relational analytical forecasting models.
+A professional, full-stack personal finance application with AI-powered transactional classification and predictive analytics. This project demonstrates an asynchronous inference pipeline integrated with a Spring Boot backend, a React frontend, and PostgreSQL persistence for an auditable financial ledger.
 
----
+Table of contents
 
-## 🚀 System Architecture & Core Capabilities
+- About
+- Key features
+- Architecture overview
+- Tech stack
+- API reference
+- Database schema & seeding
+- Local development
+- Environment variables
+- Contributing
+- License
 
-* **Asynchronous AI Inference Pipeline:** Implemented an optimized 850ms debounced transaction parser inside the client-side execution context. This minimizes API network overhead by stream-dispatching text inputs to a backend LLM orchestration tier for real-time contextual category classifications.
-* **Dynamic Relational Seeding:** Designed an on-the-fly table-seeding protocol. When the AI engine isolates an out-of-vocabulary category token, the platform exposes a secure, single-action database insertion layer to create, register, and update categorical relational entities instantaneously.
-* **Context-Aware Conversational Interface:** Integrated a secure natural language financial assistant that interfaces directly with underlying transactional tables, enabling end-users to query historical ledger allocations using unstructured language queries.
-* **Predictive Analytical Modeling:** Utilizes rolling database aggregations and time-series historical trend vectors via optimized relational query routines to generate proactive budget forecasts and anomalous variance alerts.
-* **Data Sanitization & Defensive Guards:** Engineered structural client-side error boundaries paired with strict transactional database constraints to intercept, sanitize, and isolate non-deterministic LLM text payloads before network persistence.
+About
 
----
+Expense Tracker AI is designed to automate categorization and storage of personal expenses using an LLM-based inference engine. It supports conversational queries against transaction history and provides rolling analytics to assist budgeting and forecasting.
 
-## 🏗️ System Architecture & Data Flow
+Key features
 
-+---------------------------------------------------------------------------------------+
-|                                     CLIENT LAYER                                      |
-|                                                                                       |
-|   [ User Text Input ] ----( 850ms Debounce )----> [ Axios Async Post Ingress ]        |
-+-------------------------------------------------------------|-------------------------+
-|
-JSON Request Payload
-|
-v
-+---------------------------------------------------------------------------------------+
-|                                APPLICATION SERVICE LAYER                              |
-|                                                                                       |
-|   [ Spring Boot REST Controller ] <------------------------> [ JWT Auth Filter ]      |
-|                 |                                                                     |
-|                 v                                                                     |
-|   [ LLM Inference Engine ]                                                            |
-|                 |                                                                     |
-|                 v                                                                     |
-|   [ Spring Data JPA Layer ]                                                           |
-+-----------------|---------------------------------------------------------------------+
-|
-Object-Relational Mapping (Hibernate)
-|
-v
-+---------------------------------------------------------------------------------------+
-|                                  DATA PERSISTENCE LAYER                               |
-|                                                                                       |
-|   [ PostgreSQL Database ] <---> ( Cascade Referential Integrity & Transaction Locks ) |
-+---------------------------------------------------------------------------------------+
+- Debounced client-side transaction parsing (850ms) to reduce API calls
+- LLM-driven expense classification with dynamic category creation
+- Contextual chat interface for natural-language queries over transactional data
+- Rolling analytics and time-series trend summaries for proactive insights
+- Defensive data validation and transactional integrity at the persistence layer
 
+Architecture overview
 
-1. **Ingress:** The user provides an unformatted description string into the input interface (e.g., *"Swiggy dinner with friends"*).
-2. **Debounce Optimization:** Client logic stalls execution for 850ms to prevent database connection pooling saturation and network spamming, then executes an asynchronous POST request.
-3. **Contextual Analysis:** The Spring Boot backend processes the input through an internal inference layer to match the string against existing transactional categories or fallback options.
-4. **Data Validation:** System intercepts raw output strings, verifying data structure matching before pushing properties to the application state matrix.
-5. **Dynamic Persistence:** Confirming suggestions initiates a transactional sequence in PostgreSQL, updating the table architecture and refreshing the reactive view models seamlessly.
+Client (React)
+- Collects user input and debounces inference requests (850ms)
+- Sends asynchronous JSON payloads to the backend
 
----
+Application service (Spring Boot)
+- REST controllers for expense management and AI orchestration
+- Stateless JWT-based authentication filter
+- LLM inference service that suggests categories and conversational responses
+- Persistence via Spring Data JPA / Hibernate
 
-## 🛠️ Technology Stack & Engineering Primitives
+Persistence (PostgreSQL)
+- Normalized relational schema for categories and expenses
+- Referential integrity and transaction isolation for consistent writes
 
-### Backend Ecosystem
-* **Core Runtime:** Java 17, Spring Boot, Spring Web MVC
-* **Persistence Layer:** Spring Data JPA, Hibernate ORM
-* **Security & Context:** Stateless JWT (JSON Web Tokens) Authorization Architecture
+Simple data flow (high level)
 
-### Frontend Architecture
-* **Client Core:** React.js, Vite Build System, React Router DOM
-* **UI Interface Layout:** Tailwind CSS, shadcn/ui components, Lucide Core Icons
-* **Asynchronous Notifications:** Sonner Toast notification context manager
+[User input] --(850ms debounce)--> [Client POST /api/ai/classify] --> [Spring Boot REST Controller] --> [LLM inference] --> [JPA persistence] --> [Postgres]
 
-### Relational Database
-* **Engine:** PostgreSQL
-* **Data Integrity:** Cascade referential constraints, database indexing for transactional velocity, and transactional isolation layers.
+Tech stack
 
----
+- Backend: Java 17, Spring Boot, Spring Web MVC, Spring Data JPA, Hibernate
+- Frontend: React (Vite), React Router, Tailwind CSS, shadcn/ui, Lucide icons
+- Database: PostgreSQL
+- Auth: JWT-based stateless authentication
 
-## 📡 Core API Specification Endpoints
+API reference
 
-### 1. Expense Management Controller
-* **`GET /api/expenses?userId={id}`**
-  * **Description:** Fetches all transactions linked to an authorized user ID.
-  * **Response:** `200 OK` with an array of transactional ledger objects.
-* **`POST /api/expenses`**
-  * **Description:** Persists a new transactional record to the database ledger.
-  * **Payload:** ```json
-    {
-      "description": "Uber ride to office",
-      "amount": 230.00,
-      "date": "2026-05-23",
-      "notes": "Heavy rain, autos were unavailable",
-      "categoryId": 4,
-      "userId": 1
-    }
-    ```
-* **`DELETE /api/expenses/{id}`**
-  * **Description:** Evaluates transactional integrity cascades and drops records.
+1) Expense Management
 
-### 2. AI & Analytical Orchestration Controller
-* **`POST /api/ai/classify`**
-  * **Description:** Takes a raw text string payload and yields a predicted classification key string.
-  * **Payload:** `{"description": "Cult fit annual gym membership"}`
-  * **Response:** `{"suggestedCategory": "Fitness & Gym", "isNewCategory": true}`
-* **`POST /api/ai/chat`**
-  * **Description:** Processes conversational context queries against the transactional database snapshot and yields real-time natural language insights.
-* **`GET /api/analytics/summary/{userId}`**
-  * **Description:** Queries the historical database layer to compile a rolling 30-day transactional trend summary and distribution metrics.
+- GET /api/expenses?userId={id}
+  - Description: Returns all transactions for the specified user.
+  - Response: 200 OK, JSON array of expense objects
 
----
+- POST /api/expenses
+  - Description: Create a transaction record
+  - Example payload:
 
-## 💾 Database Schema Initialization
+```json
+{
+  "description": "Uber ride to office",
+  "amount": 230.00,
+  "date": "2026-05-23",
+  "notes": "Heavy rain, autos were unavailable",
+  "categoryId": 4,
+  "userId": 1
+}
+```
 
-To seed your localized PostgreSQL instance with high-fidelity, production-grade test data to validate analytical graphs and conversational query tracking, execute the following relational scripts:
+- DELETE /api/expenses/{id}
+  - Description: Deletes a transaction (subject to referential integrity checks)
+
+2) AI & Analytics
+
+- POST /api/ai/classify
+  - Description: Classifies a raw description and suggests a category
+  - Request example: {"description": "Cult fit annual gym membership"}
+  - Response example: {"suggestedCategory": "Fitness & Gym", "isNewCategory": true}
+
+- POST /api/ai/chat
+  - Description: Conversational queries against transactional snapshots (returns natural language insights)
+
+- GET /api/analytics/summary/{userId}
+  - Description: Returns a 30-day rolling transactional summary and distribution metrics
+
+API usage examples (curl)
+
+Classify text:
+
+```bash
+curl -X POST http://localhost:8080/api/ai/classify \
+  -H 'Content-Type: application/json' \
+  -d '{"description":"Starbucks coffee"}'
+```
+
+Create expense:
+
+```bash
+curl -X POST http://localhost:8080/api/expenses \
+  -H 'Content-Type: application/json' \
+  -d '{"description":"Starbucks Coffee & Croissant","amount":4.20,"date":"2026-05-24","notes":"Coding session at the cafe","categoryId":3,"userId":1}'
+```
+
+Database schema & seeding
+
+Use the SQL below to create the minimal schema and seed sample data for local testing.
 
 ```sql
--- Ensure clean slate schema setup
+-- Categories
 DROP TABLE IF EXISTS expenses;
 DROP TABLE IF EXISTS categories;
 
--- Create Category Master Schema
 CREATE TABLE categories (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    user_id INT NOT NULL
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  user_id INT NOT NULL
 );
 
--- Create Transactional Ledger Schema
 CREATE TABLE expenses (
-    id SERIAL PRIMARY KEY,
-    description VARCHAR(255) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    date DATE NOT NULL,
-    notes TEXT,
-    category_id INT REFERENCES categories(id) ON DELETE CASCADE,
-    user_id INT NOT NULL
+  id SERIAL PRIMARY KEY,
+  description VARCHAR(255) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  date DATE NOT NULL,
+  notes TEXT,
+  category_id INT REFERENCES categories(id) ON DELETE CASCADE,
+  user_id INT NOT NULL
 );
 
--- Seed standard relational category entities
-INSERT INTO categories (id, name, user_id) VALUES 
-(1, 'Shopping', 1), 
-(2, 'Entertainment', 1), 
-(3, 'Food & Dining', 1), 
+INSERT INTO categories (id, name, user_id) VALUES
+(1, 'Shopping', 1),
+(2, 'Entertainment', 1),
+(3, 'Food & Dining', 1),
 (4, 'Travel & Transport', 1);
 
--- Reset table sequence to prevent conflict IDs
 SELECT setval('categories_id_seq', (SELECT MAX(id) FROM categories));
 
--- Seed transactional ledger data with human-like metadata
 INSERT INTO expenses (description, amount, date, notes, category_id, user_id) VALUES
 ('Swiggy - Dinner with friends', 840.00, '2026-05-22', 'Ordered pizzas', 3, 1),
 ('Uber ride to office', 230.00, '2026-05-23', 'Heavy rain, autos were unavailable', 4, 1),
 ('Monthly Netflix Subscription', 649.00, '2026-05-23', 'Premium 4K plan', 2, 1),
 ('Starbucks Coffee & Croissant', 420.00, '2026-05-24', 'Coding session at the cafe', 3, 1),
 ('Zudio - Weekend shopping haul', 1850.00, '2026-05-24', 'Bought a couple of t-shirts', 1, 1);
-⚙️ Local Deployment & Environment Setup
-System Prerequisites
-Java Development Kit (JDK) 17 or higher
+```
 
-Node.js (v18+) & npm package manager
+Local development
 
-Local or cloud-hosted instance of PostgreSQL
+Prerequisites
 
-1. Database Configuration
-Initialize a local target schema instance named expense_tracker. Configure your active application profile inside backend/src/main/resources/application.properties:
+- Java 17+
+- Node.js 18+
+- PostgreSQL (local or cloud)
+- Maven (project includes wrapper ./mvnw)
 
-Properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/expense_tracker
-spring.datasource.username=YOUR_DATABASE_USERNAME
-spring.datasource.password=YOUR_DATABASE_PASSWORD
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.show-sql=true
-2. Backend Bootstrapping
-Navigate to your repository backend root folder and build the application archive:
+Environment variables
 
-Bash
+Create a .env or set environment variables for local development (or edit application.properties for Spring Boot):
+
+- SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/expense_tracker
+- SPRING_DATASOURCE_USERNAME=your_db_user
+- SPRING_DATASOURCE_PASSWORD=your_db_password
+- JWT_SECRET=your_jwt_secret
+
+Run backend
+
+```bash
 cd backend
 ./mvnw clean install
 ./mvnw spring-boot:run
-The server framework interface will boot and bind securely to port http://localhost:8080.
+# Backend will be available at http://localhost:8080
+```
 
-3. Frontend Instantiation
-Navigate to the client asset root directory, install dependencies, and run the development server:
+Run frontend
 
-Bash
+```bash
 cd frontend
 npm install
 npm run dev
-The compilation layer will parse source map modules and instantiate the local dev node interface at http://localhost:5173.
+# Frontend dev server typically at http://localhost:5173
+```
+
+Notes
+
+- The project expects the database to be reachable and the schema applied before creating expenses.
+- The AI endpoints require the inference engine configuration (LLM provider/API keys) to be present in application configuration.
+
+Contributing
+
+Contributions are welcome. Please open an issue to discuss changes or submit a pull request with a clear description of your change, the motivation, and any relevant tests.
+
+License
+
+Specify a license in LICENSE (MIT recommended if you want permissive open source).
+
+---
+
+If you'd like, I can:
+- Add badges (build, license, coverage)
+- Add example Postman collection or OpenAPI/Swagger spec
+- Expand the API reference with all models and response schemas
+
