@@ -84,7 +84,7 @@ export default function AddExpense() {
           const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
 
           const seedRequests = SYSTEM_CORE_DEFAULTS.map(name =>
-            fetch(`http://localhost:8080/api/categories/user/${user.id}`, {
+            fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/categories/user/${user.id}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', ...authHeader },
               body: JSON.stringify({ name: name.trim() })
@@ -190,7 +190,7 @@ export default function AddExpense() {
       const token = localStorage.getItem('token');
       const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await fetch(`http://localhost:8080/api/categories/user/${user.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/categories/user/${user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeader },
         body: JSON.stringify({ name: suggestedCategory.trim() })
