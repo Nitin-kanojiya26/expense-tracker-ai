@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 // 1. DYNAMIC CHROMATIC DESIGN PALETTE
 const COLOR_PALETTE = ['#f97316', '#3b82f6', '#06b6d4', '#6366f1', '#ec4899', '#8b5cf6', '#ef4444', '#eab308', '#22c55e', '#14b8a6', '#10b981'];
 
