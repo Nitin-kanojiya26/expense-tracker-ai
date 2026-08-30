@@ -123,13 +123,12 @@ export default function Login() {
             </div>
 
             <div className="flex items-center justify-end">
-              <button
-                type="button"
-                onClick={handleForgotPasswordClick}
+              <Link
+                to="/forgot-password"
                 className="text-sm text-primary hover:underline bg-transparent border-none p-0 cursor-pointer"
               >
                 Forgot password?
-              </button>
+              </Link>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

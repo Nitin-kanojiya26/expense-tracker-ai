@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { register as registerApi } from '../api/api';
+import { register as registerApi, sendOtp } from '../api/api';
 import { toast, Toaster } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -10,12 +10,14 @@ import { Progress } from '../components/ui/progress';
 import { Eye, EyeOff, Loader2, Wallet, Check, X } from 'lucide-react';
 
 export default function Register() {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
+    otp: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -64,7 +66,7 @@ export default function Register() {
     }
   };
 
-  const validate = () => {
+  const validateStep1 = () => {
     const newErrors = {};
     const fName = String(formData.fullName || '').trim();
     const uName = String(formData.username || '').trim();
@@ -97,9 +99,29 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validateStep1()) return;
+
+    setIsLoading(true);
+    try {
+      await sendOtp(formData.email.trim());
+      toast.success('OTP sent to your email!');
+      setStep(2);
+    } catch (error) {
+      console.error('Send OTP error:', error);
+      toast.error(error.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (!formData.otp) {
+      setErrors({ otp: 'OTP is required' });
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -107,7 +129,8 @@ export default function Register() {
         fullName: String(formData.fullName).trim(),
         username: String(formData.username).trim(),
         email: String(formData.email).trim(),
-        password: String(formData.password)
+        password: String(formData.password),
+        otp: String(formData.otp).trim()
       });
 
       toast.success('Account created successfully! Redirecting...');
@@ -140,149 +163,191 @@ export default function Register() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* Full Name */}
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                placeholder="Nitin Kanojiya"
-                value={formData.fullName}
-                onChange={(e) => updateField('fullName', e.target.value)}
-                className={errors.fullName ? 'border-destructive' : ''}
-                disabled={isLoading}
-              />
-              {errors.fullName && (
-                <p className="text-sm text-destructive">{errors.fullName}</p>
-              )}
-            </div>
-
-            {/* Username */}
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                placeholder="Nitin"
-                value={formData.username}
-                onChange={(e) => updateField('username', e.target.value)}
-                className={errors.username ? 'border-destructive' : ''}
-                disabled={isLoading}
-              />
-              {errors.username && (
-                <p className="text-sm text-destructive">{errors.username}</p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={(e) => updateField('email', e.target.value)}
-                className={errors.email ? 'border-destructive' : ''}
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={(e) => updateField('password', e.target.value)}
-                  className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
-                  disabled={isLoading}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
+          {step === 1 ? (
+            <form onSubmit={handleSendOtp} className="space-y-4">
               
-              {formData.password && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Progress value={passwordStrength} className={`h-2 ${getStrengthColor()}`} />
-                    <span className="text-xs text-muted-foreground w-12">{getStrengthText()}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    {passwordChecks.map((check, index) => (
-                      <div key={index} className="flex items-center gap-1 text-xs">
-                        {check.valid ? (
-                          <Check className="h-3 w-3 text-success" />
-                        ) : (
-                          <X className="h-3 w-3 text-muted-foreground" />
-                        )}
-                        <span className={check.valid ? 'text-success' : 'text-muted-foreground'}>
-                          {check.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
+              {/* Full Name */}
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
                 <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => updateField('confirmPassword', e.target.value)}
-                  className={errors.confirmPassword ? 'border-destructive pr-10' : 'pr-10'}
+                  id="fullName"
+                  placeholder="Nitin Kanojiya"
+                  value={formData.fullName}
+                  onChange={(e) => updateField('fullName', e.target.value)}
+                  className={errors.fullName ? 'border-destructive' : ''}
                   disabled={isLoading}
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                {errors.fullName && (
+                  <p className="text-sm text-destructive">{errors.fullName}</p>
+                )}
+              </div>
+
+              {/* Username */}
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  placeholder="Nitin"
+                  value={formData.username}
+                  onChange={(e) => updateField('username', e.target.value)}
+                  className={errors.username ? 'border-destructive' : ''}
+                  disabled={isLoading}
+                />
+                {errors.username && (
+                  <p className="text-sm text-destructive">{errors.username}</p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={(e) => updateField('email', e.target.value)}
+                  className={errors.email ? 'border-destructive' : ''}
+                  disabled={isLoading}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email}</p>
+                )}
+              </div>
+
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Create a password"
+                    value={formData.password}
+                    onChange={(e) => updateField('password', e.target.value)}
+                    className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                    disabled={isLoading}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                
+                {formData.password && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Progress value={passwordStrength} className={`h-2 ${getStrengthColor()}`} />
+                      <span className="text-xs text-muted-foreground w-12">{getStrengthText()}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {passwordChecks.map((check, index) => (
+                        <div key={index} className="flex items-center gap-1 text-xs">
+                          {check.valid ? (
+                            <Check className="h-3 w-3 text-success" />
+                          ) : (
+                            <X className="h-3 w-3 text-muted-foreground" />
+                          )}
+                          <span className={check.valid ? 'text-success' : 'text-muted-foreground'}>
+                            {check.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => updateField('confirmPassword', e.target.value)}
+                    className={errors.confirmPassword ? 'border-destructive pr-10' : 'pr-10'}
+                    disabled={isLoading}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={isLoading}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending OTP...
+                  </>
+                ) : (
+                  'Send OTP'
+                )}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp">Enter OTP sent to {formData.email}</Label>
+                <Input
+                  id="otp"
+                  placeholder="6-digit OTP"
+                  value={formData.otp}
+                  onChange={(e) => updateField('otp', e.target.value)}
+                  className={errors.otp ? 'border-destructive' : ''}
+                  disabled={isLoading}
+                  maxLength={6}
+                />
+                {errors.otp && (
+                  <p className="text-sm text-destructive">{errors.otp}</p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-1/3" 
+                  onClick={() => setStep(1)}
                   disabled={isLoading}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  Back
+                </Button>
+                <Button type="submit" className="w-2/3" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    'Verify & Register'
+                  )}
                 </Button>
               </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-              )}
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                'Create account'
-              )}
-            </Button>
-          </form>
+            </form>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">

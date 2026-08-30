@@ -62,6 +62,15 @@ export const login = async (username, password) => {
   return handleResponse(res);
 };
 
+export const sendOtp = async (email) => {
+  const res = await fetch(`${API_BASE_URL}/users/send-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  return handleResponse(res);
+};
+
 export const register = async (userData) => {
   const res = await fetch(`${API_BASE_URL}/users/register`, {
     method: 'POST',
@@ -70,8 +79,18 @@ export const register = async (userData) => {
       fullName: userData.fullName,
       username: userData.username,
       email: userData.email,
-      password: userData.password
+      password: userData.password,
+      otp: userData.otp
     }),
+  });
+  return handleResponse(res);
+};
+
+export const resetPassword = async (email, otp, newPassword) => {
+  const res = await fetch(`${API_BASE_URL}/users/forgot-password/reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, otp, newPassword }),
   });
   return handleResponse(res);
 };

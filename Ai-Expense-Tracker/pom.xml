@@ -42,6 +42,12 @@
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 
+		<!-- ========= MAIL ========= -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 		<!-- ========= JPA ========= -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

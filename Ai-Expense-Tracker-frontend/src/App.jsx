@@ -5,6 +5,7 @@ import { Layout } from './components/Layout';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import AddExpense from './pages/AddExpense';
 import Expenses from './pages/Expenses';
@@ -21,6 +22,7 @@ export default function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected Routes - Layout wraps all dashboard pages */}
           <Route element={<ProtectedRoute />}>
