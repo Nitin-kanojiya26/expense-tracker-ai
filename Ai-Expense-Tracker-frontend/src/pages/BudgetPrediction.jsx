@@ -57,7 +57,7 @@ export default function BudgetPrediction() {
   const fetchPrediction = async () => {
     if (cooldown > 0) return;
     if (!user?.id) {
-      toast.error("Please log in again to calculate predictions.");
+      toast.error("Please log in again to view predictions.");
       return;
     }
 
@@ -77,11 +77,11 @@ export default function BudgetPrediction() {
           sessionStorage.setItem(`ai_prediction_payload_${user.id}`, data);
         }
         
-        toast.success('Predictive architecture updated successfully');
+        toast.success('Budget prediction generated successfully!');
         setCooldown(60); 
       }
     } catch (error) {
-      toast.error('Failed to communicate with forecasting engine');
+      toast.error(error?.message || 'Could not generate budget prediction. Please try again.');
       setCooldown(60); 
     } finally {
       setIsLoading(false);

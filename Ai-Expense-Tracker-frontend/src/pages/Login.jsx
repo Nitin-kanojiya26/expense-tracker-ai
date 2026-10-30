@@ -46,10 +46,10 @@ export default function Login() {
         toast.success('Login successful!');
         navigate('/dashboard');
       } else {
-        toast.error(response?.message || 'Login failed. Please check your credentials.');
+        toast.error(response?.message || 'Incorrect email/username or password. Please try again.');
       }
     } catch (error) {
-      toast.error(error.message || 'Network error. Please try again.');
+      toast.error(error.message || 'Unable to sign in. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }

@@ -109,7 +109,7 @@ export default function AIQuery() {
       }
       triggerCooldown();
     } catch (error) {
-      toast.error('Failed to get AI response');
+      toast.error(error?.message || 'Could not get an answer from the AI assistant. Please try again.');
       const errorMessage = {
         id: Date.now() + 1,
         type: 'ai',

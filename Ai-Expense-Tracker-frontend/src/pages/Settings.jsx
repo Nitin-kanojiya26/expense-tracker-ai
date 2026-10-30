@@ -72,7 +72,7 @@ export default function Settings() {
 
   const handleSaveName = async () => {
     if (!name.trim()) {
-      toast.error('Name cannot be empty');
+      toast.error('Please enter a valid name.');
       return;
     }
     setIsSavingName(true);
@@ -81,7 +81,7 @@ export default function Settings() {
       updateUserData({ ...user, name: name.trim() });
       toast.success('Name updated successfully');
     } catch (error) {
-      toast.error('Failed to update name');
+      toast.error(error?.message || 'Unable to update your name. Please try again.');
     } finally {
       setIsSavingName(false);
     }
@@ -120,7 +120,7 @@ export default function Settings() {
       toast.success('Password changed successfully');
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
-      toast.error(error.message || 'Failed to change password');
+      toast.error(error?.message || 'Unable to change password. Please verify your current password.');
     } finally {
       setIsSavingPassword(false);
     }
@@ -133,7 +133,7 @@ export default function Settings() {
       toast.success('Account deleted');
       logout();
     } catch (error) {
-      toast.error('Failed to delete account');
+      toast.error(error?.message || 'Unable to delete account. Please try again.');
       setIsDeleting(false);
     }
   };

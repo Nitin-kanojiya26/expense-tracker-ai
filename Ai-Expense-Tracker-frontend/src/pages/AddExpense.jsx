@@ -98,7 +98,7 @@ export default function AddExpense() {
           await fetchAndSyncCategories(user.id);
         } catch (seedError) {
           console.error("Auto-seed process aborted:", seedError);
-          toast.error("Failed to seed initial categories into database");
+          toast.error("Could not load default categories. Please refresh the page.");
           setIsPageLoading(false);
         }
       }
@@ -219,7 +219,7 @@ export default function AddExpense() {
       toast.success(`Saved and applied new category: "${suggestedCategory}"`);
     } catch (err) {
       toast.dismiss("on-the-fly-cat");
-      toast.error("Failed to establish new category entry records");
+      toast.error(err.message || "Could not create the new category. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -264,7 +264,7 @@ export default function AddExpense() {
       toast.success('Expense saved successfully!');
       setIsSuccess(true);
     } catch (error) {
-      toast.error(error.message || 'Submission error');
+      toast.error(error.message || 'Could not save expense. Please check your inputs and try again.');
     } finally {
       setIsLoading(false);
     }

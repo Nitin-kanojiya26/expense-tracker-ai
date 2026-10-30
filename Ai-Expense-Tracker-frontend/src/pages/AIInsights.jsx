@@ -57,7 +57,7 @@ export default function AIInsights() {
   const handleFetchInsights = async () => {
     if (cooldown > 0) return; 
     if (!user?.id) {
-      toast.error("Please log in again to see your insights.");
+      toast.error("Please log in again to view your insights.");
       return;
     }
     
@@ -84,13 +84,13 @@ export default function AIInsights() {
         setCooldown(60);
       } else {
         setAiUnavailable(true);
-        toast.error("The money assistant is busy with calculations right now.");
+        toast.error("The AI assistant is currently busy. Please try again in a few moments.");
         setCooldown(60);
       }
     } catch (error) {
       console.error("Insights API pipeline offline:", error);
       setAiUnavailable(true);
-      toast.error('Could not connect to the processing server. Checking back shortly.');
+      toast.error(err?.message || 'Could not connect to AI services. Please try again shortly.');
       setCooldown(60); 
     } finally {
       setIsLoading(false);

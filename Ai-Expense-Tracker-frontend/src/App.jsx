@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import { Toaster } from 'sonner';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
+        <Toaster position="top-right" richColors closeButton duration={4000} />
       </AuthProvider>
     </BrowserRouter>
   );

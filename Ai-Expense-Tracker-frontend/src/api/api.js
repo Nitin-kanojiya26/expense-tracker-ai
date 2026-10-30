@@ -1,4 +1,7 @@
+import { getFriendlyErrorMessage } from '../lib/utils';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
 // 1. DYNAMIC CHROMATIC DESIGN PALETTE
 const COLOR_PALETTE = ['#f97316', '#3b82f6', '#06b6d4', '#6366f1', '#ec4899', '#8b5cf6', '#ef4444', '#eab308', '#22c55e', '#14b8a6', '#10b981'];
 
@@ -24,25 +27,31 @@ const handleResponse = async (response) => {
     localStorage.removeItem('user');
     if (window.location.pathname !== '/login') {
       window.location.href = '/login';
-      throw new Error('Unauthorized');
+      throw new Error('Your session has expired. Please sign in again.');
     }
     throw new Error('Incorrect username/email or password.');
   }
 
   if (!response.ok) {
     const rawError = await response.text();
-    let friendlyMessage = 'Something went wrong';
+    let message = 'Something went wrong. Please try again.';
     try {
       if (rawError.trim().startsWith('{') || rawError.trim().startsWith('[')) {
         const parsedError = JSON.parse(rawError);
-        if (parsedError.message) friendlyMessage = parsedError.message;
+        if (parsedError.message) {
+          message = parsedError.message;
+        } else if (parsedError.error) {
+          message = parsedError.error;
+        } else if (parsedError.errors && typeof parsedError.errors === 'object') {
+          message = Object.values(parsedError.errors).join(', ');
+        }
       } else if (rawError) {
-        friendlyMessage = rawError;
+        message = rawError;
       }
     } catch (e) {
       console.error("Error evaluating response text stream", e);
     }
-    throw new Error(friendlyMessage);
+    throw new Error(getFriendlyErrorMessage(message));
   }
 
   const contentType = response.headers.get('content-type');
@@ -52,27 +61,34 @@ const handleResponse = async (response) => {
   return response.text();
 };
 
+const apiFetch = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    return await handleResponse(res);
+  } catch (err) {
+    throw new Error(getFriendlyErrorMessage(err));
+  }
+};
+
 // 3. SECURE AUTH PATHWAYS
 export const login = async (username, password) => {
-  const res = await fetch(`${API_BASE_URL}/users/login`, {
+  return apiFetch(`${API_BASE_URL}/users/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
-  return handleResponse(res);
 };
 
 export const sendOtp = async (email) => {
-  const res = await fetch(`${API_BASE_URL}/users/send-otp`, {
+  return apiFetch(`${API_BASE_URL}/users/send-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
   });
-  return handleResponse(res);
 };
 
 export const register = async (userData) => {
-  const res = await fetch(`${API_BASE_URL}/users/register`, {
+  return apiFetch(`${API_BASE_URL}/users/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -83,39 +99,34 @@ export const register = async (userData) => {
       otp: userData.otp
     }),
   });
-  return handleResponse(res);
 };
 
 export const resetPassword = async (email, otp, newPassword) => {
-  const res = await fetch(`${API_BASE_URL}/users/forgot-password/reset`, {
+  return apiFetch(`${API_BASE_URL}/users/forgot-password/reset`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, otp, newPassword }),
   });
-  return handleResponse(res);
 };
 
 // 4. LIVE DATABASE CATEGORIES STREAM
 export const getCategories = async (userId) => {
-  const res = await fetch(`${API_BASE_URL}/categories/user/${userId}`, {
+  return apiFetch(`${API_BASE_URL}/categories/user/${userId}`, {
     headers: { ...getAuthHeader() }
   });
-  return handleResponse(res);
 };
 
 // 5. SECURE TRANSACTION LEDGER HANDLERS
 export const getExpenses = async (userId, page = 0, size = 10) => {
-  const res = await fetch(`${API_BASE_URL}/expenses/user/${userId}?page=${page}&size=${size}`, {
+  return apiFetch(`${API_BASE_URL}/expenses/user/${userId}?page=${page}&size=${size}`, {
     headers: { ...getAuthHeader() }
   });
-  return handleResponse(res);
 };
 
 export const getAllExpenses = async (userId) => {
-  const res = await fetch(`${API_BASE_URL}/expenses/user/${userId}`, {
+  return apiFetch(`${API_BASE_URL}/expenses/user/${userId}`, {
     headers: { ...getAuthHeader() }
   });
-  return handleResponse(res);
 };
 
 export const createExpense = async (userId, expense) => {
@@ -123,12 +134,11 @@ export const createExpense = async (userId, expense) => {
   let url = `${API_BASE_URL}/expenses/user/${userId}`;
   if (categoryId) url += `?categoryId=${categoryId}`;
 
-  const res = await fetch(url, {
+  return apiFetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify(payload),
   });
-  return handleResponse(res);
 };
 
 export const updateExpense = async (id, expense) => {
@@ -136,67 +146,60 @@ export const updateExpense = async (id, expense) => {
   let url = `${API_BASE_URL}/expenses/${id}`;
   if (categoryId) url += `?categoryId=${categoryId}`;
 
-  const res = await fetch(url, {
+  return apiFetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify(payload),
   });
-  return handleResponse(res);
 };
 
 export const deleteExpense = async (id) => {
-  const res = await fetch(`${API_BASE_URL}/expenses/${id}`, {
+  return apiFetch(`${API_BASE_URL}/expenses/${id}`, {
     method: 'DELETE',
     headers: { ...getAuthHeader() },
   });
-  return handleResponse(res);
 };
 
 // 6. COGNITIVE AI PROCESSING METHODS
 export const getAIInsights = async (userId) => {
-  const res = await fetch(`${API_BASE_URL}/ai/insights?userId=${userId}`, {
+  return apiFetch(`${API_BASE_URL}/ai/insights?userId=${userId}`, {
     headers: { ...getAuthHeader() },
   });
-  return handleResponse(res);
 };
 
 export const getBudgetPrediction = async (userId) => {
-  const res = await fetch(`${API_BASE_URL}/ai/predict?userId=${userId}`, {
+  return apiFetch(`${API_BASE_URL}/ai/predict?userId=${userId}`, {
     headers: { ...getAuthHeader() },
   });
-  return handleResponse(res);
 };
 
 export const askAI = async (userId, question) => {
-  const res = await fetch(`${API_BASE_URL}/ai/query?userId=${userId}`, {
+  return apiFetch(`${API_BASE_URL}/ai/query?userId=${userId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify({ question }),
   });
-  return handleResponse(res);
 };
 
 export const suggestCategory = async (description) => {
-  const res = await fetch(`${API_BASE_URL}/ai/suggest-category`, {
+  return apiFetch(`${API_BASE_URL}/ai/suggest-category`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify({ description }),
   });
-  return handleResponse(res);
 };
 
 // 7. PROFILE ENDPOINTS
 export const updateUser = async (userId, userData) => {
-  const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
+  return apiFetch(`${API_BASE_URL}/users/${userId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify(userData),
   });
-  return handleResponse(res);
 };
 
 export const changePassword = async (userId, currentPassword, newPassword) => {
-  const res = await fetch(`${API_BASE_URL}/users/${userId}/change-password`, {
+  return apiFetch(`${API_BASE_URL}/users/${userId}/change-password`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -204,15 +207,15 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
     },
     body: JSON.stringify({ currentPassword, newPassword }),
   });
-  return handleResponse(res);
 };
+
 export const deleteAccount = async (userId) => {
-  const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
+  return apiFetch(`${API_BASE_URL}/users/${userId}`, {
     method: 'DELETE',
     headers: { ...getAuthHeader() },
   });
-  return handleResponse(res);
 };
+
 export const generateUniqueColor = (str) => {
   if (!str) return 'hsl(0, 0%, 50%)';
   let hash = 0;

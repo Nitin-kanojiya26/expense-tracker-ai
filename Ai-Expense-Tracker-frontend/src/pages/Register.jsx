@@ -110,7 +110,7 @@ export default function Register() {
       setStep(2);
     } catch (error) {
       console.error('Send OTP error:', error);
-      toast.error(error.message || 'Failed to send OTP. Please try again.');
+      toast.error(error.message || 'Unable to send verification code. Please check your email and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +141,7 @@ export default function Register() {
 
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error(error.message || 'Registration failed. Please try again.');
+      toast.error(error.message || 'Registration failed. Please check the information provided and try again.');
     } finally {
       setIsLoading(false);
     }

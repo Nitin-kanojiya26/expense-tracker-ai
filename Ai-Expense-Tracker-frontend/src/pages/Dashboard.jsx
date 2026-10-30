@@ -50,7 +50,7 @@ export default function Dashboard() {
       const data = await getAllExpenses(user.id);
       setExpenses(Array.isArray(data) ? data : []);
     } catch (error) {
-      toast.error('Failed to parse active metrics ledger list');
+      toast.error('Could not load your expenses. Please refresh to try again.');
     } finally {
       setIsLoading(false);
     }
@@ -68,9 +68,9 @@ export default function Dashboard() {
     try {
       await deleteExpense(deleteId);
       setExpenses((prev) => prev.filter((item) => item.id !== deleteId));
-      toast.success('Ledger item data point purged completely');
+      toast.success('Expense deleted successfully');
     } catch (error) {
-      toast.error(error.message || 'Server rejected transaction drop operation');
+      toast.error(error.message || 'Could not delete expense. Please try again.');
     } finally {
       setIsDeleting(false);
       setDeleteId(null);

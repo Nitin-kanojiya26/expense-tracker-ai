@@ -32,7 +32,7 @@ export default function ForgotPassword() {
       setStep(2);
     } catch (error) {
       console.error('Send OTP error:', error);
-      toast.error(error.message || 'Failed to send OTP. Please try again.');
+      toast.error(error.message || 'Unable to send verification code. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +58,7 @@ export default function ForgotPassword() {
       }, 1500);
     } catch (error) {
       console.error('Reset Password error:', error);
-      toast.error(error.message || 'Failed to reset password. Please try again.');
+      toast.error(error.message || 'Unable to reset password. Please check your verification code.');
     } finally {
       setIsLoading(false);
     }
