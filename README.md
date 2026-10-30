@@ -173,13 +173,16 @@ Create a .env or set environment variables for local development (or edit applic
 - GEMINI_API_KEY=your_gemini_key
 
 ### Brevo (Sendinblue) Email Configuration
-Cloud providers (Render, AWS, etc.) block direct Gmail SMTP. Use Brevo's free transactional SMTP:
+Render Free Tier blocks all outbound SMTP ports (25, 465, 587). To send emails reliably without connection timeouts, set `BREVO_API_KEY` to send via HTTPS (Port 443):
+- `BREVO_API_KEY`=your_brevo_api_key (from Brevo Dashboard > SMTP & API > API Keys tab, starts with `xkeysib-...`)
+- `MAIL_FROM`=your_verified_sender_email@domain.com (must be verified in Brevo > Senders)
+- `MAIL_FROM_NAME`=SpentAI (optional)
+
+Optional SMTP relay fallback (for paid hosting where port 587 is open):
 - `MAIL_HOST`=smtp-relay.brevo.com
 - `MAIL_PORT`=587
 - `MAIL_USERNAME`=your_brevo_smtp_login
 - `MAIL_PASSWORD`=your_brevo_smtp_key
-- `MAIL_FROM`=your_verified_sender_email@domain.com
-- `MAIL_FROM_NAME`=SpentAI
 
 ### Render Keep-Alive with UptimeRobot
 Render free instances go to sleep after 15 minutes of inactivity. To keep your backend awake:

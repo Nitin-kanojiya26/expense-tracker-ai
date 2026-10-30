@@ -47,7 +47,35 @@ export function getFriendlyErrorMessage(error, fallback = 'Something went wrong.
 
   const lower = msg.toLowerCase();
 
-  // 1. Connection & Network Issues
+  // 1. Email & Verification Codes (Check first to avoid generic timeout intercept)
+  if (
+    lower.includes('brevo') ||
+    lower.includes('mail') ||
+    lower.includes('smtp') ||
+    lower.includes('otp') ||
+    lower.includes('verification code')
+  ) {
+    if (lower.includes('render') || lower.includes('brevo_api_key') || lower.includes('blocked')) {
+      return 'On Render free tier, SMTP is blocked. Please add BREVO_API_KEY in Render settings to send via HTTPS.';
+    }
+    if (lower.includes('timed out') || lower.includes('timeout') || lower.includes('couldn\'t connect')) {
+      return 'Email delivery timed out. Please add BREVO_API_KEY in Render to send via HTTPS (Port 443).';
+    }
+    if (lower.includes('sender') || lower.includes('verified')) {
+      return 'Email delivery failed: Sender address is not verified in Brevo. Please check MAIL_FROM.';
+    }
+    return 'Unable to deliver verification email. Please check your email address and try again.';
+  }
+
+  if (
+    lower.includes('invalid or expired otp') ||
+    lower.includes('invalid otp') ||
+    lower.includes('expired otp')
+  ) {
+    return 'The verification code is incorrect or has expired. Please request a new one.';
+  }
+
+  // 2. Connection & General Network Issues
   if (
     lower.includes('failed to fetch') ||
     lower.includes('networkerror') ||
@@ -62,7 +90,7 @@ export function getFriendlyErrorMessage(error, fallback = 'Something went wrong.
     return 'The request took too long to complete. Please try again.';
   }
 
-  // 2. Database & Constraint Violations
+  // 3. Database & Constraint Violations
   if (lower.includes('unique constraint') || lower.includes('duplicate key')) {
     if (lower.includes('email')) {
       return 'An account with this email already exists.';
@@ -84,27 +112,6 @@ export function getFriendlyErrorMessage(error, fallback = 'Something went wrong.
     lower.includes('psqlexception')
   ) {
     return 'We encountered a database error. Please try again in a few moments.';
-  }
-
-  // 3. Email & Verification Codes
-  if (
-    lower.includes('brevo') ||
-    lower.includes('mail') ||
-    lower.includes('smtp') ||
-    lower.includes('otp verification email')
-  ) {
-    if (lower.includes('sender') || lower.includes('verified')) {
-      return 'Email delivery failed. The sender address is not verified in the mail service.';
-    }
-    return 'Unable to deliver the verification email right now. Please verify your email address and try again.';
-  }
-
-  if (
-    lower.includes('invalid or expired otp') ||
-    lower.includes('invalid otp') ||
-    lower.includes('expired otp')
-  ) {
-    return 'The verification code is incorrect or has expired. Please request a new one.';
   }
 
   // 4. Authentication & Authorization
@@ -144,15 +151,12 @@ export function getFriendlyErrorMessage(error, fallback = 'Something went wrong.
   }
 
   // 6. Generic Cleanups
-  // Strip common technical prefixes
   msg = msg.replace(/^(error:|runtimeexception:|exception:|failed:)\s*/i, '').trim();
 
-  // Filter out raw stack traces or JSON blobs
   if (msg.length > 200 || msg.includes('at org.') || msg.includes('at com.') || msg.includes('java.lang.')) {
     return fallback;
   }
 
-  // Clean up robotic jargon
   if (lower.includes('ledger item data point purged') || lower.includes('transaction drop operation')) {
     return 'Could not delete expense. Please try again.';
   }
