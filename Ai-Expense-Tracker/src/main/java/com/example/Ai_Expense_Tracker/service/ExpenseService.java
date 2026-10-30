@@ -70,7 +70,7 @@ public class ExpenseService {
     public SummaryDTO getSummary(Long userId, LocalDate startDate, LocalDate endDate) {
         requireOwnerOrAdmin(userId);
 
-        // 🔥 1. LAST 30 DAYS (for avgPer30Days)
+        // 1. LAST 30 DAYS (for avgPer30Days)
         LocalDate end = LocalDate.now();
         LocalDate start30 = end.minusDays(29);
 
@@ -83,18 +83,18 @@ public class ExpenseService {
 
         Double avgPer30Days = total30 / 30.0;
 
-        // 🔥 2. FULL YEAR (Jan → Now) for monthlyAvg
+        //  2. FULL YEAR (Jan → Now) for monthlyAvg
         LocalDate yearStart = LocalDate.of(end.getYear(), 1, 1);
 
         List<Expense> yearExpenses = expenseRepository
                 .findByUserIdAndDateBetween(userId, yearStart, end);
 
-        // 🔹 Total (you can decide: year total OR 30-day total)
+        //  Total (you can decide: year total OR 30-day total)
         Double total = yearExpenses.stream()
                 .mapToDouble(Expense::getAmount)
                 .sum();
 
-        // 🔹 Category-wise (year based)
+        //  Category-wise (year based)
         Map<String, Double> categoryWise = yearExpenses.stream()
                 .filter(e -> e.getCategory() != null)
                 .collect(Collectors.groupingBy(
@@ -102,7 +102,7 @@ public class ExpenseService {
                         Collectors.summingDouble(Expense::getAmount)
                 ));
 
-        // 🔥 Monthly Avg (Jan → Now)
+        //  Monthly Avg (Jan → Now)
         Map<YearMonth, Double> monthlyTotal = yearExpenses.stream()
                 .collect(Collectors.groupingBy(
                         e -> YearMonth.from(e.getDate()),

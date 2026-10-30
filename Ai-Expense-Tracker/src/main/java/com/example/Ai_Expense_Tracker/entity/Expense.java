@@ -24,13 +24,12 @@ public class Expense {
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name="user_id",nullable = false)
+    @JoinColumn(name="user_id", nullable = false)
     private User user;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-
 
     private String notes;
 }
