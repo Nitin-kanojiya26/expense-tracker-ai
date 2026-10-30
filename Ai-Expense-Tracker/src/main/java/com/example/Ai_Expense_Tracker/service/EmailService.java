@@ -1,5 +1,7 @@
 package com.example.Ai_Expense_Tracker.service;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -20,16 +23,16 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final WebClient webClient;
 
-    // Brevo API Key (for sending over HTTPS port 443 - bypasses Render SMTP port blocks)
-    @Value("${brevo.api.key:${BREVO_API_KEY:}}")
+    // Accepts BREVO_API_KEY, brevo.api.key, or fallback to spring.mail.password
+    @Value("${brevo.api.key:${BREVO_API_KEY:${spring.mail.password:}}}")
     private String brevoApiKey;
 
-    // Sender email address - must be verified in Brevo
-    @Value("${mail.from.email:${spring.mail.username:}}")
+    // Sender email address - must be a verified sender in your Brevo account
+    @Value("${mail.from.email:${MAIL_FROM:${spring.mail.username:}}}")
     private String fromEmail;
 
     // Display sender name
-    @Value("${mail.from.name:SpentAI}")
+    @Value("${mail.from.name:${MAIL_FROM_NAME:SpentAI}}")
     private String fromName;
 
     public EmailService(JavaMailSender mailSender, WebClient.Builder webClientBuilder) {
@@ -67,29 +70,27 @@ public class EmailService {
                 + "</div>";
 
         // Strategy 1: Brevo REST API via HTTPS (Port 443).
-        // Essential on Render Free tier where outbound SMTP (ports 25, 465, 587) is blocked.
+        // Works on Render Free Tier without SMTP port blocking.
         if (brevoApiKey != null && !brevoApiKey.isBlank()) {
-            boolean success = sendViaBrevoApi(toEmail, sender, textContent, htmlContent);
-            if (success) {
-                return;
-            }
+            sendViaBrevoApi(toEmail, sender, textContent, htmlContent);
+            return;
         }
 
         // Strategy 2: Fall back to SMTP relay
         sendViaSmtp(toEmail, sender, textContent, htmlContent);
     }
 
-    private boolean sendViaBrevoApi(String toEmail, String sender, String textContent, String htmlContent) {
+    private void sendViaBrevoApi(String toEmail, String sender, String textContent, String htmlContent) {
+        log.info("Dispatching email via Brevo REST API (HTTPS port 443) to {}", toEmail);
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("sender", Map.of("name", fromName, "email", sender));
+        payload.put("to", List.of(Map.of("email", toEmail.trim())));
+        payload.put("subject", "Your Verification Code - " + fromName);
+        payload.put("htmlContent", htmlContent);
+        payload.put("textContent", textContent);
+
         try {
-            log.info("Sending email via Brevo REST API (HTTPS port 443) to {}", toEmail);
-
-            Map<String, Object> payload = new LinkedHashMap<>();
-            payload.put("sender", Map.of("name", fromName, "email", sender));
-            payload.put("to", List.of(Map.of("email", toEmail.trim())));
-            payload.put("subject", "Your Verification Code - " + fromName);
-            payload.put("htmlContent", htmlContent);
-            payload.put("textContent", textContent);
-
             String response = webClient.post()
                     .uri("https://api.brevo.com/v3/smtp/email")
                     .header("api-key", brevoApiKey.trim())
@@ -102,11 +103,26 @@ public class EmailService {
                     .block();
 
             log.info("Brevo REST API delivered email successfully: {}", response);
-            return true;
+        } catch (WebClientResponseException e) {
+            String body = e.getResponseBodyAsString();
+            log.error("Brevo REST API error (HTTP {}): {}", e.getStatusCode(), body);
+            String detail = parseBrevoError(body, e.getMessage());
+            throw new RuntimeException("Brevo API error: " + detail, e);
         } catch (Exception e) {
-            log.error("Brevo REST API call failed: {}. Falling back to SMTP...", e.getMessage());
-            return false;
+            log.error("Brevo REST API call failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to send email via Brevo API: " + e.getMessage(), e);
         }
+    }
+
+    private String parseBrevoError(String jsonBody, String fallback) {
+        if (jsonBody == null || jsonBody.isBlank()) return fallback;
+        try {
+            JsonObject obj = JsonParser.parseString(jsonBody).getAsJsonObject();
+            if (obj.has("message")) {
+                return obj.get("message").getAsString();
+            }
+        } catch (Exception ignored) {}
+        return jsonBody;
     }
 
     private void sendViaSmtp(String toEmail, String sender, String textContent, String htmlContent) {
@@ -126,7 +142,7 @@ public class EmailService {
             log.error("SMTP delivery failed: {}", e.getMessage(), e);
             String errorMsg = e.getMessage() != null ? e.getMessage() : "";
             if (errorMsg.contains("timed out") || errorMsg.contains("timeout") || errorMsg.contains("Couldn't connect")) {
-                throw new RuntimeException("SMTP connection timed out. On Render Free tier, SMTP ports are blocked. Please add BREVO_API_KEY in Render environment variables to send via HTTPS.", e);
+                throw new RuntimeException("Render free tier blocks SMTP ports (587/465). Please add BREVO_API_KEY in your Render environment variables.", e);
             }
             throw new RuntimeException("Failed to send OTP verification email: " + e.getMessage(), e);
         }
