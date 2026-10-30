@@ -169,6 +169,24 @@ Create a .env or set environment variables for local development (or edit applic
 - SPRING_DATASOURCE_USERNAME=your_db_user
 - SPRING_DATASOURCE_PASSWORD=your_db_password
 - JWT_SECRET=your_jwt_secret
+- CORS_ALLOWED_ORIGINS=http://localhost:5173,https://your-frontend.vercel.app
+- GEMINI_API_KEY=your_gemini_key
+
+### Brevo (Sendinblue) Email Configuration
+Cloud providers (Render, AWS, etc.) block direct Gmail SMTP. Use Brevo's free transactional SMTP:
+- `MAIL_HOST`=smtp-relay.brevo.com
+- `MAIL_PORT`=587
+- `MAIL_USERNAME`=your_brevo_smtp_login
+- `MAIL_PASSWORD`=your_brevo_smtp_key
+- `MAIL_FROM`=your_verified_sender_email@domain.com
+- `MAIL_FROM_NAME`=SpentAI
+
+### Render Keep-Alive with UptimeRobot
+Render free instances go to sleep after 15 minutes of inactivity. To keep your backend awake:
+- Endpoint: `https://<your-app>.onrender.com/health` (or `/api/health`)
+- Monitor Type: `HTTP(s)` in UptimeRobot
+- Frequency: Every 5 or 10 minutes
+- Returns: `200 OK` (`{"status":"UP", ...}`) without authentication
 
 Run backend
 

@@ -15,4 +15,4 @@ COPY --from=build /app/target/*.jar app.jar
 # Expose port 8080
 EXPOSE 8080
 # Run the application, using the PORT environment variable if provided by Render
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -jar app.jar"]
