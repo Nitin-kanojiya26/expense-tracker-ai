@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from './ui/button';
 import { Menu } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
@@ -18,6 +19,7 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const pageTitle = pageTitles[location.pathname] || 'Dashboard';
+  const isChatPage = location.pathname === '/ai-query';
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -31,14 +33,22 @@ export function Layout() {
             size="icon"
             className="lg:hidden"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Toggle navigation menu"
           >
             <Menu className="h-5 w-5" />
           </Button>
           <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
         </header>
 
-        {/* Main content */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        {/* Main content - optimized for full-height responsive chat without double scrollbars */}
+        <main
+          className={cn(
+            'flex-1',
+            isChatPage
+              ? 'p-2 sm:p-4 md:p-6 flex flex-col h-[calc(100dvh-4rem)] overflow-hidden'
+              : 'p-4 md:p-6 overflow-auto'
+          )}
+        >
           <Outlet />
         </main>
       </div>
