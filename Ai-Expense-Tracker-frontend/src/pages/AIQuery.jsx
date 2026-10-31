@@ -17,6 +17,23 @@ const suggestedQuestions = [
   'Which category has the highest spending?',
 ];
 
+// Helper to format AI responses: parses bold markdown (**bold**) cleanly and safely
+const formatAiMessage = (text) => {
+  if (!text || typeof text !== 'string') return text;
+  
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+      return (
+        <strong key={idx} className="font-semibold text-foreground">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
 export default function AIQuery() {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -155,21 +172,21 @@ export default function AIQuery() {
   };
 
   return (
-    <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col min-h-0 animate-fade-in text-foreground">
+    <div className="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0 min-w-0 max-w-full overflow-hidden animate-fade-in text-foreground">
       <Toaster position="top-right" richColors />
 
-      {/* Main Chat Card: Takes full responsive container height */}
-      <Card className="flex-1 flex flex-col min-h-0 rounded-2xl border-border/70 shadow-xs overflow-hidden bg-card">
+      {/* Main Chat Card: Takes full responsive container height and prevents horizontal expansion */}
+      <Card className="flex-1 flex flex-col min-h-0 min-w-0 w-full max-w-full rounded-2xl border-border/70 shadow-xs overflow-hidden bg-card">
         
         {/* Compact, Clean Chat Header */}
-        <CardHeader className="px-3.5 py-2.5 sm:px-5 sm:py-3.5 border-b border-border/50 bg-muted/10 shrink-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
+        <CardHeader className="px-3.5 py-2.5 sm:px-5 sm:py-3.5 border-b border-border/50 bg-muted/10 shrink-0 w-full max-w-full min-w-0">
+          <div className="flex items-center justify-between gap-2 w-full min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="relative w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
                 <Bot className="h-5 w-5 text-primary" />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-card" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm sm:text-base font-bold truncate">SpentAI Assistant</CardTitle>
                 </div>
@@ -203,31 +220,31 @@ export default function AIQuery() {
           </div>
         </CardHeader>
 
-        {/* Scrollable Messages Container with native smooth momentum scrolling */}
+        {/* Scrollable Messages Container with native smooth momentum scrolling and strict width bounding */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-5 space-y-3.5 sm:space-y-4"
+          className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-5 space-y-3.5 sm:space-y-4 w-full max-w-full min-w-0"
         >
           {messages.length === 0 ? (
             /* Empty State: Designed to fit cleanly without overflowing small mobile viewports */
-            <div className="h-full flex flex-col items-center justify-center text-center p-3 sm:p-6 my-auto">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 text-primary">
+            <div className="h-full flex flex-col items-center justify-center text-center p-3 sm:p-6 my-auto w-full max-w-full min-w-0">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 text-primary shrink-0">
                 <Sparkles className="h-6 w-6 sm:h-8 sm:s-8" />
               </div>
-              <h3 className="font-bold text-base sm:text-lg mb-1.5">Ask Anything About Your Spending</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6 max-w-sm leading-relaxed">
+              <h3 className="font-bold text-base sm:text-lg mb-1.5 px-2">Ask Anything About Your Spending</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6 max-w-sm px-2 leading-relaxed">
                 I can summarize your category budgets, identify top expenses, and reveal financial habits.
               </p>
 
               {/* Suggestions Grid */}
-              <div className="w-full max-w-md grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="w-full max-w-md grid grid-cols-1 sm:grid-cols-2 gap-2 px-1">
                 {suggestedQuestions.map((question, index) => (
                   <Button
                     key={index}
                     variant="outline"
                     disabled={isLoading || cooldown > 0}
                     onClick={() => handleSuggestionClick(question)}
-                    className="h-auto py-2.5 px-3 rounded-xl border-border/70 text-xs font-medium text-left justify-start gap-2 hover:bg-muted/50 active:scale-[0.98] transition-transform"
+                    className="h-auto py-2.5 px-3 rounded-xl border-border/70 text-xs font-medium text-left justify-start gap-2 hover:bg-muted/50 active:scale-[0.98] transition-transform w-full min-w-0"
                   >
                     <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
                     <span className="truncate">{question}</span>
@@ -242,7 +259,7 @@ export default function AIQuery() {
                 <div
                   key={message.id}
                   className={cn(
-                    'flex gap-2 sm:gap-2.5 items-end',
+                    'flex gap-2 sm:gap-2.5 items-end w-full max-w-full min-w-0',
                     message.type === 'user' ? 'justify-end' : 'justify-start'
                   )}
                 >
@@ -253,25 +270,31 @@ export default function AIQuery() {
                     </div>
                   )}
 
-                  {/* Message Bubble: optimized width and font for phone screens */}
+                  {/* Message Bubble: strictly bounded width and word-break to never overflow on mobile */}
                   <div
                     className={cn(
-                      'rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm shadow-xs break-words leading-relaxed',
+                      'rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm shadow-xs leading-relaxed min-w-0',
                       message.type === 'user'
                         ? 'max-w-[85%] sm:max-w-[75%] bg-primary text-primary-foreground rounded-br-xs font-medium'
                         : message.isError
                         ? 'max-w-[88%] sm:max-w-[80%] bg-destructive/10 text-destructive border border-destructive/20 rounded-bl-xs'
                         : 'max-w-[88%] sm:max-w-[80%] bg-muted/60 text-foreground border border-border/40 rounded-bl-xs'
                     )}
+                    style={{
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere',
+                    }}
                   >
-                    <p className="whitespace-pre-wrap">{message.text}</p>
+                    <div className="w-full max-w-full min-w-0 break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+                      {formatAiMessage(message.text)}
+                    </div>
                   </div>
                 </div>
               ))}
 
               {/* Typing Indicator */}
               {isLoading && (
-                <div className="flex gap-2 sm:gap-2.5 items-end justify-start">
+                <div className="flex gap-2 sm:gap-2.5 items-end justify-start w-full max-w-full min-w-0">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mb-0.5">
                     <Bot className="h-4 w-4 text-primary" />
                   </div>
@@ -291,10 +314,10 @@ export default function AIQuery() {
           )}
         </div>
 
-        {/* Horizontal Swipeable Suggestions Bar (when chat is active) */}
+        {/* Horizontal Swipeable Suggestions Bar (when chat is active) - strictly contained */}
         {messages.length > 0 && !isLoading && (
-          <div className="px-3 sm:px-4 py-2 border-t border-border/40 bg-muted/5 shrink-0">
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none -mx-1 px-1">
+          <div className="w-full max-w-full min-w-0 overflow-hidden px-3 sm:px-4 py-2 border-t border-border/40 bg-muted/5 shrink-0">
+            <div className="w-full max-w-full min-w-0 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none touch-pan-x">
               {suggestedQuestions.map((question, index) => (
                 <button
                   key={index}
@@ -311,9 +334,9 @@ export default function AIQuery() {
           </div>
         )}
 
-        {/* Bottom Input Area: Touch-friendly & Safe for iOS Safari (text-base avoids auto-zoom) */}
-        <div className="p-2.5 sm:p-3.5 border-t border-border/50 bg-card shrink-0">
-          <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+        {/* Bottom Input Area: Touch-friendly, Safe for iOS Safari (text-base avoids auto-zoom), strictly bounded */}
+        <div className="p-2.5 sm:p-3.5 border-t border-border/50 bg-card shrink-0 w-full max-w-full min-w-0 overflow-hidden">
+          <form onSubmit={handleSubmit} className="flex gap-2 items-center w-full max-w-full min-w-0">
             <Input
               ref={inputRef}
               value={input}
@@ -324,8 +347,7 @@ export default function AIQuery() {
                   : 'Ask about your expenses...'
               }
               disabled={isLoading || cooldown > 0}
-              // text-base on mobile prevents iOS Safari from force-zooming on focus
-              className="flex-1 h-11 sm:h-10 rounded-xl bg-background border-border/70 pl-3.5 text-base sm:text-sm focus-visible:ring-primary/20"
+              className="flex-1 min-w-0 h-11 sm:h-10 rounded-xl bg-background border-border/70 pl-3.5 text-base sm:text-sm focus-visible:ring-primary/20"
             />
             <Button
               type="submit"
